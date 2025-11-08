@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase, isSupabaseEnabled, disableSupabase } from '../lib/supabase';
 import { Play, ArrowLeft } from 'lucide-react';
 
 interface YouTubeEmbedProps {
@@ -14,8 +14,16 @@ export const YouTubeEmbed = ({ isPlaying, onFullscreenChange }: YouTubeEmbedProp
   const [isFullscreen, setIsFullscreen] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const DEFAULT_VIDEO_ID = 'GK5SFCP5U2c';
+  const DEFAULT_EMBED_URL = `https://www.youtube.com/embed/${DEFAULT_VIDEO_ID}`;
 
   useEffect(() => {
+    if (!isSupabaseEnabled()) {
+      setVideoUrl(DEFAULT_EMBED_URL);
+      setLoading(false);
+      return;
+    }
+
     fetchVideoUrl();
 
     const subscription = supabase
@@ -30,7 +38,11 @@ export const YouTubeEmbed = ({ isPlaying, onFullscreenChange }: YouTubeEmbedProp
       .subscribe();
 
     return () => {
-      subscription.unsubscribe();
+      try {
+        supabase.removeChannel(subscription);
+      } catch {
+        subscription.unsubscribe?.();
+      }
     };
   }, []);
 
@@ -72,16 +84,29 @@ export const YouTubeEmbed = ({ isPlaying, onFullscreenChange }: YouTubeEmbedProp
   }, [onFullscreenChange]);
 
   const fetchVideoUrl = async () => {
-    const { data, error } = await supabase
-      .from('settings')
-      .select('value')
-      .eq('key', 'youtube_url')
-      .maybeSingle();
-
-    if (!error && data) {
-      setVideoUrl(data.value || '');
+    if (!isSupabaseEnabled()) {
+      setVideoUrl(DEFAULT_EMBED_URL);
+      setLoading(false);
+      return;
     }
-    setLoading(false);
+    try {
+      const { data, error } = await supabase
+        .from('settings')
+        .select('value')
+        .eq('key', 'youtube_url')
+        .maybeSingle();
+
+      if (!error && data && typeof data.value === 'string' && data.value.length > 0) {
+        setVideoUrl(data.value);
+      } else {
+        setVideoUrl(DEFAULT_EMBED_URL);
+      }
+    } catch (e: any) {
+      disableSupabase('Network error fetching YouTube URL');
+      setVideoUrl(DEFAULT_EMBED_URL);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const enterFullscreen = () => {
@@ -120,7 +145,7 @@ export const YouTubeEmbed = ({ isPlaying, onFullscreenChange }: YouTubeEmbedProp
   };
 
   const getEmbedUrl = () => {
-    if (!videoUrl) return '';
+    if (!videoUrl) return DEFAULT_EMBED_URL;
 
     const params = new URLSearchParams({
       autoplay: isPlaying ? '1' : '0',
@@ -146,7 +171,7 @@ export const YouTubeEmbed = ({ isPlaying, onFullscreenChange }: YouTubeEmbedProp
       return `https://www.youtube.com/embed/${videoId}?${params.toString()}`;
     }
 
-    return '';
+    return DEFAULT_EMBED_URL;
   };
 
   if (loading) {

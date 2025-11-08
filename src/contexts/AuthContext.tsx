@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import type { AuthChangeEvent, Session, User as SupabaseAuthUser } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { Database } from '../lib/database.types';
 import type { ProfileData } from '../components/GoogleProfileCompletionModal';
@@ -74,7 +75,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     initializeAuth();
 
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session: Session | null) => {
       if (import.meta.env.DEV) {
         console.log('[AuthContext] Auth state changed:', event);
       }
@@ -90,20 +91,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const handleAuthCallback = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: sessionData } = await supabase.auth.getSession();
+    const session = sessionData.session;
     if (session?.user) {
       await handleGoogleUser(session.user);
     }
   };
 
-  const handleGoogleUser = async (authUser: any) => {
+  const handleGoogleUser = async (authUser: SupabaseAuthUser) => {
     try {
       if (import.meta.env.DEV) {
         console.log('[AuthContext] Handling Google user authentication');
       }
       const googleId = authUser.id;
-      const email = authUser.email;
-      const name = authUser.user_metadata?.full_name || authUser.user_metadata?.name || email?.split('@')[0] || 'User';
+      const emailStr: string = authUser.email ?? '';
+      const nameStr: string =
+        authUser.user_metadata?.full_name ??
+        authUser.user_metadata?.name ??
+        (emailStr ? emailStr.split('@')[0] : undefined) ??
+        'User';
 
       const { data: existingUser, error: fetchError } = await supabase
         .from('users')
@@ -131,7 +137,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             console.log('[AuthContext] Profile incomplete, showing completion modal');
           }
           setUser(existingUser);
-          setGoogleUserData({ name: name, email: email });
+          setGoogleUserData({ name: nameStr, email: emailStr });
           setShowProfileCompletionModal(true);
           setLoading(false);
           return;
@@ -156,7 +162,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         console.log('[AuthContext] New Google user, showing profile completion modal');
       }
 
-      setGoogleUserData({ name: name, email: email });
+      setGoogleUserData({ name: nameStr, email: emailStr });
       setShowProfileCompletionModal(true);
       setLoading(false);
     } catch (error) {
@@ -324,7 +330,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signInWithGoogle = async (): Promise<{ success: boolean; error?: string }> => {
     try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
+      const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/`,
@@ -377,7 +383,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return { success: false, error: 'This mobile number is already registered to another account.' };
       }
 
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: sessionData } = await supabase.auth.getSession();
+      const session = sessionData.session;
       if (!session?.user) {
         return { success: false, error: 'Authentication session not found' };
       }

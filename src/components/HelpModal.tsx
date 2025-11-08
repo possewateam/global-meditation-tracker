@@ -20,12 +20,14 @@ export const HelpModal = ({ isOpen, onClose }: HelpModalProps) => {
 
   const fetchHelpSettings = async () => {
     setLoading(true);
-    const { data } = await supabase
+    const { data: rows } = await supabase
       .from('help_settings')
       .select('*')
       .eq('is_active', true)
-      .maybeSingle();
+      .order('updated_at', { ascending: false })
+      .limit(1);
 
+    const data = Array.isArray(rows) && rows.length > 0 ? rows[0] : null;
     if (data) {
       setYoutubeUrl(data.youtube_url || '');
       setImageUrl(data.image_url || '');

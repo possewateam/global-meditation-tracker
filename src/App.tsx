@@ -12,7 +12,8 @@ const MeditationHistory = lazy(() => import('./pages/MeditationHistory').then(m 
 const HelpPage = lazy(() => import('./pages/HelpPage').then(m => ({ default: m.HelpPage })));
 const MeditationRoom = lazy(() => import('./pages/MeditationRoom').then(m => ({ default: m.MeditationRoom })));
 const Profile = lazy(() => import('./pages/Profile').then(m => ({ default: m.Profile })));
-const GoodWishes = lazy(() => import('./pages/GoodWishes').then(m => ({ default: m.GoodWishes })));
+// Explicitly include extension to satisfy TS module resolution in strict mode
+const GoodWishes = lazy(() => import('./pages/GoodWishes.tsx').then(m => ({ default: m.GoodWishes })));
 const LocationConsentModal = lazy(() => import('./components/LocationConsentModal').then(m => ({ default: m.LocationConsentModal })));
 const GoogleProfileCompletionModal = lazy(() => import('./components/GoogleProfileCompletionModal').then(m => ({ default: m.GoogleProfileCompletionModal })));
 

@@ -9,6 +9,19 @@
   --color-background: #0f172a;
 }
 
+/* Ensure text size adjust works across modern browsers */
+html {
+  text-size-adjust: 100%;
+  /* Keep vendor prefix for Safari while providing the standard property */
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Safari fallback for selection utilities */
+.select-none { -webkit-user-select: none; }
+.select-text { -webkit-user-select: text; }
+.select-all { -webkit-user-select: all; }
+.select-auto { -webkit-user-select: auto; }
+
 /* Prevent horizontal scrolling across the entire app while keeping vertical scroll */
 html, body, #root {
   width: 100%;

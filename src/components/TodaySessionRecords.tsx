@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Clock, Users, MapPin, Activity, Calendar } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { supabase } from '../lib/supabase';
+import { supabase, isSupabaseEnabled, disableSupabase } from '../lib/supabase';
 
 interface SessionRecord {
   id: string;
@@ -22,6 +22,10 @@ export const TodaySessionRecords = () => {
   const [activeSessions, setActiveSessions] = useState(0);
 
   useEffect(() => {
+    if (!isSupabaseEnabled()) {
+      setLoading(false);
+      return;
+    }
     fetchTodaySessions();
 
     const interval = setInterval(() => {
@@ -45,11 +49,12 @@ export const TodaySessionRecords = () => {
 
     return () => {
       clearInterval(interval);
-      channel.unsubscribe();
+      try { supabase.removeChannel(channel); } catch { channel.unsubscribe?.(); }
     };
   }, []);
 
   const fetchTodaySessions = async () => {
+    if (!isSupabaseEnabled()) return;
     try {
       const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kolkata';
       const now = new Date();
@@ -70,13 +75,15 @@ export const TodaySessionRecords = () => {
       }
 
       if (data) {
-        setSessions(data);
-        setTotalSessions(data.length);
-        setActiveSessions(data.filter(s => s.is_active).length);
+        const typedData = data as SessionRecord[];
+        setSessions(typedData);
+        setTotalSessions(typedData.length);
+        setActiveSessions(typedData.filter((s: SessionRecord) => s.is_active).length);
       }
       setLoading(false);
     } catch (error) {
       console.error('Exception fetching today sessions:', error);
+      disableSupabase('Network error fetching today sessions');
       setLoading(false);
     }
   };

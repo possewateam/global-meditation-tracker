@@ -127,6 +127,15 @@ export const MeditationHistory = () => {
         <p className="text-teal-300">{t('history.subtitle')}</p>
       </div>
 
+      <div className="mb-6">
+        <a
+          href="/"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 text-white rounded-lg font-semibold hover:bg-white/20 transition-all duration-300 border border-teal-500/30"
+        >
+          {t('common.backToDashboard')}
+        </a>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         <div className="bg-gradient-to-br from-teal-500/20 to-emerald-500/20 backdrop-blur-lg rounded-xl p-6 border border-teal-500/30">
           <div className="flex items-center gap-3 mb-2">

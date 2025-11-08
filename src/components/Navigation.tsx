@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Home, History, LogOut, HelpCircle, Video, User, Menu, Users, Trophy, Calendar, Youtube } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
-import { supabase } from '../lib/supabase';
+import { supabase, isSupabaseEnabled } from '../lib/supabase';
 import { LanguageSelector } from './LanguageSelector';
 
 interface NavigationProps {
@@ -18,6 +18,10 @@ export const Navigation = ({ currentPage, onNavigate }: NavigationProps) => {
 
   useEffect(() => {
     const fetchDisplaySettings = async () => {
+      if (!isSupabaseEnabled()) {
+        setShowMeditationRoom(true);
+        return;
+      }
       const { data: settingsData } = await supabase
         .from('settings')
         .select('value')
@@ -25,7 +29,8 @@ export const Navigation = ({ currentPage, onNavigate }: NavigationProps) => {
         .maybeSingle();
 
       if (settingsData) {
-        setShowMeditationRoom(settingsData.value === 'true');
+        const value = (settingsData as { value?: string | boolean }).value;
+        setShowMeditationRoom(value === 'true' || value === true);
       } else {
         const { data: adminData } = await supabase
           .from('admin_display_settings')
@@ -33,19 +38,22 @@ export const Navigation = ({ currentPage, onNavigate }: NavigationProps) => {
           .maybeSingle();
 
         if (adminData) {
-          setShowMeditationRoom(adminData.show_meditation_room ?? true);
+          const show = (adminData as { show_meditation_room?: boolean }).show_meditation_room;
+          setShowMeditationRoom(show ?? true);
         }
       }
     };
 
     fetchDisplaySettings();
 
+    if (!isSupabaseEnabled()) return;
+
     const channel = supabase
       .channel('meditation-room-visibility')
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'settings', filter: 'key=eq.meditation_room_visible' },
-        (payload) => {
+        (payload: any) => {
           if (payload.new && typeof payload.new === 'object' && 'value' in payload.new) {
             setShowMeditationRoom((payload.new as any).value === 'true');
           }
@@ -54,7 +62,7 @@ export const Navigation = ({ currentPage, onNavigate }: NavigationProps) => {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'admin_display_settings' },
-        (payload) => {
+        (payload: any) => {
           if (payload.new && typeof payload.new === 'object' && 'show_meditation_room' in payload.new) {
             setShowMeditationRoom((payload.new as any).show_meditation_room ?? true);
           }
@@ -63,7 +71,7 @@ export const Navigation = ({ currentPage, onNavigate }: NavigationProps) => {
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      try { supabase.removeChannel(channel); } catch { channel.unsubscribe?.(); }
     };
   }, []);
 
@@ -84,6 +92,30 @@ export const Navigation = ({ currentPage, onNavigate }: NavigationProps) => {
             >
               <Home className="w-5 h-5" />
               <span className="hidden sm:inline">{t('nav.dashboard')}</span>
+            </button>
+            <button
+              onClick={() => onNavigate('goodwishes')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+                currentPage === 'goodwishes'
+                  ? 'bg-teal-500 text-white shadow-lg'
+                  : 'text-white/70 hover:text-white hover:bg-white/10'
+              }`}
+              aria-label="Good Wishes"
+            >
+              <Youtube className="w-5 h-5" />
+              <span className="hidden sm:inline">Good Wishes</span>
+            </button>
+            <button
+              onClick={() => onNavigate('history')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+                currentPage === 'history'
+                  ? 'bg-teal-500 text-white shadow-lg'
+                  : 'text-white/70 hover:text-white hover:bg-white/10'
+              }`}
+              aria-label="History"
+            >
+              <History className="w-5 h-5" />
+              <span className="hidden sm:inline">{t('nav.history')}</span>
             </button>
           </div>
           <div className="relative">

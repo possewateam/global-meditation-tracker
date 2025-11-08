@@ -1,6 +1,6 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
-import { supabase } from '../lib/supabase';
+import { supabase, isSupabaseEnabled, disableSupabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useSessionCleanup } from '../hooks/useSessionCleanup';
 import { useLanguagePreference } from '../hooks/useLanguagePreference';
@@ -64,6 +64,12 @@ export const Dashboard = () => {
   }, []);
 
   useEffect(() => {
+    if (!isSupabaseEnabled()) {
+      // Local-only mode: skip remote queries
+      setTodayTotal(0);
+      return;
+    }
+
     fetchTodayTotal();
     recoverOrphanedSession();
 
@@ -106,21 +112,29 @@ export const Dashboard = () => {
     }, 10000);
 
     const cleanupInterval = setInterval(async () => {
-      const { data, error } = await supabase.rpc('cleanup_stale_sessions');
-      if (!error && data && data > 0) {
-        fetchTodayTotal();
+      try {
+        const { data, error } = await supabase.rpc('cleanup_stale_sessions');
+        if (!error && data && data > 0) {
+          fetchTodayTotal();
+        }
+      } catch (e: any) {
+        disableSupabase('Network error during cleanup');
       }
     }, 30000);
 
     return () => {
-      heroChannel.unsubscribe();
-      displayChannel.unsubscribe();
+      try { supabase.removeChannel(heroChannel); } catch { heroChannel.unsubscribe?.(); }
+      try { supabase.removeChannel(displayChannel); } catch { displayChannel.unsubscribe?.(); }
       clearInterval(updateInterval);
       clearInterval(cleanupInterval);
     };
   }, []);
 
   const recoverOrphanedSession = async () => {
+    if (!isSupabaseEnabled()) {
+      localStorage.removeItem('activeSession');
+      return;
+    }
     const storedSession = localStorage.getItem('activeSession');
     if (!storedSession) return;
 
@@ -142,12 +156,17 @@ export const Dashboard = () => {
         .eq('is_active', true);
 
       localStorage.removeItem('activeSession');
-    } catch (error) {
+    } catch (error: any) {
+      disableSupabase('Network error recovering session');
       localStorage.removeItem('activeSession');
     }
   };
 
   const fetchTodayTotal = async () => {
+    if (!isSupabaseEnabled()) {
+      setTodayTotal(0);
+      return;
+    }
     try {
       const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kolkata';
       const { data, error } = await supabase.rpc('get_meditation_totals', { tz });
@@ -162,31 +181,42 @@ export const Dashboard = () => {
       const totalMinutes = Math.floor(Number(row?.today_minutes ?? 0));
       console.log('[Dashboard] Today\'s total updated:', totalMinutes, 'minutes');
       setTodayTotal(totalMinutes);
-    } catch (error) {
+    } catch (error: any) {
       console.error('[Dashboard] Exception fetching today total:', error);
+      disableSupabase('Network error fetching totals');
       setTodayTotal(0);
     }
   };
 
   const fetchHeroImage = async () => {
-    const { data } = await supabase
-      .from('hero_settings')
-      .select('image_url')
-      .maybeSingle();
+    if (!isSupabaseEnabled()) return;
+    try {
+      const { data } = await supabase
+        .from('hero_settings')
+        .select('image_url')
+        .maybeSingle();
 
-    if (data && data.image_url) {
-      setHeroImageUrl(data.image_url);
+      if (data && data.image_url) {
+        setHeroImageUrl(data.image_url);
+      }
+    } catch (e: any) {
+      disableSupabase('Network error fetching hero image');
     }
   };
 
   const fetchDisplaySettings = async () => {
-    const { data } = await supabase
-      .from('admin_display_settings')
-      .select('show_active_meditators')
-      .maybeSingle();
+    if (!isSupabaseEnabled()) return;
+    try {
+      const { data } = await supabase
+        .from('admin_display_settings')
+        .select('show_active_meditators')
+        .maybeSingle();
 
-    if (data) {
-      setShowActiveMeditators(data.show_active_meditators ?? true);
+      if (data) {
+        setShowActiveMeditators(data.show_active_meditators ?? true);
+      }
+    } catch (e: any) {
+      disableSupabase('Network error fetching display settings');
     }
   };
 
@@ -199,6 +229,10 @@ export const Dashboard = () => {
   };
 
   const startMeditationSession = async () => {
+    if (!isSupabaseEnabled()) {
+      alert('Remote database unavailable. Please try again later.');
+      return;
+    }
     const displayName = user ? user.name : (userName || t('common.anonymous'));
     const userLocation = user?.bk_centre_name || 'Unknown';
 
@@ -215,9 +249,9 @@ export const Dashboard = () => {
       console.log('No stored location, fetching current location');
       const profile = {
         name: displayName,
-        countryCode: user?.country_code,
-        stateCode: user?.state_code,
-        city: user?.city_town
+        countryCode: user?.country_code ?? undefined,
+        stateCode: user?.state_code ?? undefined,
+        city: user?.city_town ?? undefined,
       };
 
       const geo = await getGeoOrFallback(profile);
@@ -274,6 +308,13 @@ export const Dashboard = () => {
 
   const handleStopMeditation = async () => {
     if (!currentSessionId) return;
+    if (!isSupabaseEnabled()) {
+      setIsActive(false);
+      setCurrentSessionId(null);
+      setStartTime(null);
+      localStorage.removeItem('activeSession');
+      return;
+    }
 
     const endTime = new Date();
     const duration = startTime
@@ -391,18 +432,7 @@ export const Dashboard = () => {
         </div>
 
         <footer className="mt-12 pb-4">
-          <div className="max-w-6xl mx-auto mb-8">
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-teal-500/20">
-              <img
-                src={heroImageUrl}
-                alt="Power of Sakash - World Meditation Project"
-                className="w-full h-auto object-cover"
-                loading="lazy"
-                decoding="async"
-              />
-            </div>
-          </div>
-
+          
           <div className="text-center mb-6">
             <div className="flex items-center justify-center gap-3 mb-4">
               <img

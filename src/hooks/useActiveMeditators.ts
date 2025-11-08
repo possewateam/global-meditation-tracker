@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase, isSupabaseEnabled, disableSupabase } from '../lib/supabase';
 
 export type ActiveMeditator = {
   id: string;
@@ -19,6 +19,11 @@ export function useActiveMeditators() {
   const [error, setError] = useState<string | null>(null);
 
   async function load() {
+    if (!isSupabaseEnabled()) {
+      setItems([]);
+      setError(null);
+      return;
+    }
     try {
       setError(null);
       const { data, error: rpcError } = await supabase.rpc('get_active_meditators', {
@@ -47,12 +52,18 @@ export function useActiveMeditators() {
       setItems(meditators);
     } catch (err) {
       console.error('[useActiveMeditators] Exception:', err);
+      disableSupabase('Network error loading active meditators');
       setError(err instanceof Error ? err.message : 'Failed to load active meditators');
     }
   }
 
   useEffect(() => {
     load().finally(() => setLoading(false));
+
+    if (!isSupabaseEnabled()) {
+      setLoading(false);
+      return;
+    }
 
     const channel = supabase
       .channel('meditation_sessions_active')
@@ -71,7 +82,7 @@ export function useActiveMeditators() {
     }, 30000);
 
     return () => {
-      supabase.removeChannel(channel);
+      try { supabase.removeChannel(channel); } catch { channel.unsubscribe?.(); }
       clearInterval(interval);
     };
   }, []);

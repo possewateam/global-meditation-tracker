@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Trophy, Crown, Medal } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 
 interface LeaderboardRow {
@@ -22,7 +21,6 @@ function secsToHHMM(secs: number = 0): string {
 }
 
 export const LeaderboardSection = () => {
-  const { t } = useTranslation();
   const [tab, setTab] = useState<TabType>('daily');
   const [rows, setRows] = useState<LeaderboardRow[]>([]);
   const [visible, setVisible] = useState(true);
@@ -36,10 +34,10 @@ export const LeaderboardSection = () => {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'settings', filter: 'key=eq.leaderboard_visible' },
-        (payload) => {
+        (payload: any) => {
           console.log('Leaderboard visibility changed:', payload);
-          if (payload.new && 'value' in payload.new) {
-            const newVisibility = payload.new.value === 'true';
+          if (payload.new && typeof payload.new === 'object' && 'value' in payload.new) {
+            const newVisibility = (payload.new as any).value === 'true';
             console.log('Setting leaderboard visibility to:', newVisibility);
             setVisible(newVisibility);
           }
@@ -71,7 +69,8 @@ export const LeaderboardSection = () => {
       return;
     }
 
-    const isVisible = data?.value === 'true' || data?.value === true || !data;
+    const value = (data as { value?: string | boolean } | null)?.value;
+    const isVisible = value === 'true' || value === true || !data;
     console.log('Leaderboard visibility fetched:', isVisible, 'raw value:', data?.value);
     setVisible(isVisible);
   };
@@ -86,7 +85,8 @@ export const LeaderboardSection = () => {
         : 'leaderboard_month_ist';
 
     try {
-      const { data, error } = await supabase.rpc(fnName, { p_limit: 100 });
+      // Supabase RPC type may be missing from generated Database types; cast to any for args
+      const { data, error } = await supabase.rpc(fnName as any, { p_limit: 100 } as any);
 
       if (error) {
         console.error('Leaderboard error:', error);

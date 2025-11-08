@@ -131,6 +131,32 @@ export interface Database {
           updated_at?: string | null
         }
       }
+      help_settings: {
+        Row: {
+          id: string
+          youtube_url: string
+          image_url: string
+          is_active: boolean
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          youtube_url?: string
+          image_url?: string
+          is_active?: boolean
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          youtube_url?: string
+          image_url?: string
+          is_active?: boolean
+          created_at?: string | null
+          updated_at?: string | null
+        }
+      }
       user_preferences: {
         Row: {
           id: string
@@ -412,6 +438,326 @@ export interface Database {
           state_id?: string
           name?: string
           created_at?: string | null
+        }
+      }
+      // Added missing tables referenced across the app to fix TS 'never' errors
+      theme_settings: {
+        Row: {
+          id: string
+          primary_color: string
+          secondary_color: string
+          accent_color: string
+          background_color: string
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          primary_color?: string
+          secondary_color?: string
+          accent_color?: string
+          background_color?: string
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          primary_color?: string
+          secondary_color?: string
+          accent_color?: string
+          background_color?: string
+          created_at?: string | null
+          updated_at?: string | null
+        }
+      }
+      hero_settings: {
+        Row: {
+          id: string
+          image_url: string
+          storage_path: string
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          image_url?: string
+          storage_path?: string
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          image_url?: string
+          storage_path?: string
+          created_at?: string | null
+          updated_at?: string | null
+        }
+      }
+      announcement_settings: {
+        Row: {
+          id: string
+          message: string
+          is_active: boolean
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          message?: string
+          is_active?: boolean
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          message?: string
+          is_active?: boolean
+          created_at?: string | null
+          updated_at?: string | null
+        }
+      }
+      theme_presets: {
+        Row: {
+          id: string
+          name: string
+          primary_color: string
+          secondary_color: string
+          accent_color: string
+          background_color: string
+          is_active: boolean | null
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          name: string
+          primary_color: string
+          secondary_color: string
+          accent_color: string
+          background_color: string
+          is_active?: boolean | null
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          name?: string
+          primary_color?: string
+          secondary_color?: string
+          accent_color?: string
+          background_color?: string
+          is_active?: boolean | null
+          created_at?: string | null
+        }
+      }
+      admin_display_settings: {
+        Row: {
+          id: string
+          show_active_meditators: boolean | null
+          show_meditation_room: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          show_active_meditators?: boolean | null
+          show_meditation_room?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          show_active_meditators?: boolean | null
+          show_meditation_room?: boolean | null
+          updated_at?: string | null
+        }
+      }
+      admin_credentials: {
+        Row: {
+          id: string
+          email: string
+          password_hash: string
+          reset_token: string | null
+          reset_token_expires: string | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          email: string
+          password_hash: string
+          reset_token?: string | null
+          reset_token_expires?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          email?: string
+          password_hash?: string
+          reset_token?: string | null
+          reset_token_expires?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+      }
+      good_wishes_videos: {
+        Row: {
+          id: string
+          title: string
+          youtube_url: string
+          thumbnail_url: string | null
+          is_active: boolean
+          order_index: number | null
+          created_at: string
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          title: string
+          youtube_url: string
+          thumbnail_url?: string | null
+          is_active?: boolean
+          order_index?: number | null
+          created_at?: string
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          title?: string
+          youtube_url?: string
+          thumbnail_url?: string | null
+          is_active?: boolean
+          order_index?: number | null
+          created_at?: string
+          updated_at?: string | null
+        }
+      }
+      notifications: {
+        Row: {
+          id: string
+          title: string
+          body: string
+          audience_type: string
+          audience_filter: Json | null
+          send_at: string
+          repeat_rrule: string | null
+          status: string
+          channels: Json | null
+          sent_at: string | null
+          created_by: string
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          title: string
+          body: string
+          audience_type?: string
+          audience_filter?: Json | null
+          send_at: string
+          repeat_rrule?: string | null
+          status?: string
+          channels?: Json | null
+          sent_at?: string | null
+          created_by: string
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          title?: string
+          body?: string
+          audience_type?: string
+          audience_filter?: Json | null
+          send_at?: string
+          repeat_rrule?: string | null
+          status?: string
+          channels?: Json | null
+          sent_at?: string | null
+          created_by?: string
+          created_at?: string | null
+          updated_at?: string | null
+        }
+      }
+      notification_deliveries: {
+        Row: {
+          id: string
+          notification_id: string
+          user_id: string | null
+          channel: string
+          status: string
+          delivered_at: string | null
+          read_at: string | null
+          error_message: string | null
+        }
+        Insert: {
+          id?: string
+          notification_id: string
+          user_id?: string | null
+          channel: string
+          status?: string
+          delivered_at?: string | null
+          read_at?: string | null
+          error_message?: string | null
+        }
+        Update: {
+          id?: string
+          notification_id?: string
+          user_id?: string | null
+          channel?: string
+          status?: string
+          delivered_at?: string | null
+          read_at?: string | null
+          error_message?: string | null
+        }
+      }
+      notification_dispatch_logs: {
+        Row: {
+          id: string
+          notification_id: string
+          dispatch_time: string | null
+          status: string | null
+          recipients_count: number | null
+          error_message: string | null
+        }
+        Insert: {
+          id?: string
+          notification_id: string
+          dispatch_time?: string | null
+          status?: string | null
+          recipients_count?: number | null
+          error_message?: string | null
+        }
+        Update: {
+          id?: string
+          notification_id?: string
+          dispatch_time?: string | null
+          status?: string | null
+          recipients_count?: number | null
+          error_message?: string | null
+        }
+      }
+      push_subscriptions: {
+        Row: {
+          id: string
+          user_id: string | null
+          endpoint: string
+          keys: Json | null
+          user_agent: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          endpoint: string
+          keys?: Json | null
+          user_agent?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          endpoint?: string
+          keys?: Json | null
+          user_agent?: string | null
+          updated_at?: string | null
         }
       }
     }

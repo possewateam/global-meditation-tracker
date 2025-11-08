@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase, isSupabaseEnabled, disableSupabase } from '../lib/supabase';
 
 interface CollectiveTimeStats {
   todayMinutes: number;
@@ -15,6 +15,12 @@ export const useCollectiveMeditationTime = () => {
   const [error, setError] = useState<string | null>(null);
 
   const fetchCollectiveTime = async () => {
+    if (!isSupabaseEnabled()) {
+      setStats({ todayMinutes: 0, collectiveMinutes: 0 });
+      setError(null);
+      setIsLoading(false);
+      return;
+    }
     try {
       const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kolkata';
 
@@ -40,6 +46,7 @@ export const useCollectiveMeditationTime = () => {
       setIsLoading(false);
     } catch (error) {
       console.error('[CollectiveTime] Exception fetching collective meditation time:', error);
+      disableSupabase('Network error fetching collective time');
       setStats({
         todayMinutes: 0,
         collectiveMinutes: 0,
@@ -50,6 +57,10 @@ export const useCollectiveMeditationTime = () => {
   };
 
   useEffect(() => {
+    if (!isSupabaseEnabled()) {
+      setIsLoading(false);
+      return;
+    }
     fetchCollectiveTime();
 
     // Subscribe to meditation_sessions changes for real-time updates
@@ -91,8 +102,8 @@ export const useCollectiveMeditationTime = () => {
     }, 60000);
 
     return () => {
-      supabase.removeChannel(meditationChannel);
-      supabase.removeChannel(dailyTotalsChannel);
+      try { supabase.removeChannel(meditationChannel); } catch { meditationChannel.unsubscribe?.(); }
+      try { supabase.removeChannel(dailyTotalsChannel); } catch { dailyTotalsChannel.unsubscribe?.(); }
       clearInterval(interval);
       clearInterval(midnightCheckInterval);
     };

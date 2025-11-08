@@ -134,11 +134,13 @@ export const AdminPanel = () => {
   };
 
   const fetchHelpSettings = async () => {
-    const { data } = await supabase
+    const { data: rows } = await supabase
       .from('help_settings')
       .select('*')
-      .maybeSingle();
-
+      .eq('is_active', true)
+      .order('updated_at', { ascending: false })
+      .limit(1);
+    const data = Array.isArray(rows) && rows.length > 0 ? rows[0] : null;
     if (data) {
       setHelpSettingsId(data.id);
       setHelpYoutubeUrl(data.youtube_url || '');
@@ -347,29 +349,35 @@ export const AdminPanel = () => {
     setMessage('');
 
     try {
-      if (helpSettingsId) {
-        const { error } = await supabase
-          .from('help_settings')
-          .update({
+      const now = new Date().toISOString();
+
+      // Use upsert to handle both create and update paths reliably
+      const { data: upserted, error: upsertError } = await supabase
+        .from('help_settings')
+        .upsert(
+          {
+            id: helpSettingsId ?? undefined,
             youtube_url: helpYoutubeUrl,
             image_url: helpImageUrl,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', helpSettingsId);
+            is_active: true,
+            updated_at: now,
+          },
+          { onConflict: 'id' }
+        )
+        .select()
+        .maybeSingle();
 
-        if (error) throw error;
-      } else {
-        const { data, error } = await supabase
+      if (upsertError) throw upsertError;
+
+      const savedId = upserted?.id ?? helpSettingsId;
+      if (savedId) {
+        setHelpSettingsId(savedId);
+        // Ensure only one active record to avoid Help page fetch conflicts
+        const { error: deactivateError } = await supabase
           .from('help_settings')
-          .insert({
-            youtube_url: helpYoutubeUrl,
-            image_url: helpImageUrl,
-          })
-          .select()
-          .single();
-
-        if (error) throw error;
-        if (data) setHelpSettingsId(data.id);
+          .update({ is_active: false })
+          .neq('id', savedId);
+        if (deactivateError) throw deactivateError;
       }
 
       setMessage('Help settings saved successfully!');

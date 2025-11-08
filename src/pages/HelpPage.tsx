@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { ArrowLeft, Youtube, Image as ImageIcon } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { LanguageSelector } from '../components/LanguageSelector';
 
@@ -9,7 +8,7 @@ interface HelpPageProps {
 }
 
 export const HelpPage = ({ onBack }: HelpPageProps) => {
-  const { t } = useTranslation();
+  // Removed unused translation helper to resolve TS6133 warning.
   const [youtubeUrl, setYoutubeUrl] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [loading, setLoading] = useState(true);
@@ -20,12 +19,14 @@ export const HelpPage = ({ onBack }: HelpPageProps) => {
 
   const fetchHelpSettings = async () => {
     setLoading(true);
-    const { data } = await supabase
+    const { data: rows } = await supabase
       .from('help_settings')
       .select('*')
       .eq('is_active', true)
-      .maybeSingle();
+      .order('updated_at', { ascending: false })
+      .limit(1);
 
+    const data = Array.isArray(rows) && rows.length > 0 ? rows[0] : null;
     if (data) {
       setYoutubeUrl(data.youtube_url || '');
       setImageUrl(data.image_url || '');
@@ -53,7 +54,10 @@ export const HelpPage = ({ onBack }: HelpPageProps) => {
       <div className="max-w-5xl mx-auto">
         <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 md:p-8 shadow-2xl border border-teal-500/20">
           <div className="flex items-center justify-between mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold text-white">Project Help</h1>
+            <div className="flex-1 text-center">
+              <h1 className="text-3xl md:text-4xl font-bold text-white">Project Help</h1>
+              <p className="text-[40px] text-[#FFD700]">HelpDesk Only Whatsapp No. - 8016701999</p>
+            </div>
             <button
               onClick={onBack}
               className="flex items-center gap-2 px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-semibold transition-all duration-300 hover:shadow-lg"
@@ -118,6 +122,7 @@ export const HelpPage = ({ onBack }: HelpPageProps) => {
                   </div>
                 </div>
               )}
+
             </div>
           )}
         </div>
