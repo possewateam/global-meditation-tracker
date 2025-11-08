@@ -1,4 +1,4 @@
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, useRef } from 'react';
 import { LogIn, Phone } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
@@ -15,6 +15,7 @@ export const Login = () => {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState('');
   const [validationError, setValidationError] = useState('');
+  const formRef = useRef<HTMLFormElement | null>(null);
 
   const validateMobileNumber = (number: string): string => {
     if (!number) return 'Mobile number is required';
@@ -104,7 +105,7 @@ export const Login = () => {
             {t('auth.loginSubtitle')}
           </p>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="flex items-center gap-2 text-white mb-2 font-medium">
                 <Phone className="w-4 h-4" />
@@ -122,6 +123,19 @@ export const Login = () => {
                   inputProps={{
                     required: true,
                     autoFocus: false,
+                    onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const form = formRef.current;
+                        if (form) {
+                          if (typeof form.requestSubmit === 'function') {
+                            form.requestSubmit();
+                          } else {
+                            form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+                          }
+                        }
+                      }
+                    },
                   }}
                   countryCodeEditable={false}
                   disableDropdown={false}
