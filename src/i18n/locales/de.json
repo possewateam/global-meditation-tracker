@@ -1,0 +1,80 @@
+{
+  "common": {
+    "anonymous": "Anonym",
+    "admin": "Administrator",
+    "backToDashboard": "Zurück zum Dashboard",
+    "cancel": "Abbrechen",
+    "save": "Änderungen speichern",
+    "saving": "Speichern...",
+    "login": "Anmelden",
+    "password": "Passwort"
+  },
+  "dashboard": {
+    "title": "Kraft von Sakash",
+    "subtitle": "Globale Live-Meditation",
+    "liveCount": "{{count}} Meditierende weltweit live",
+    "detectingLocation": "Ihr Standort wird ermittelt...",
+    "globalMap": "Global Collective Time",
+    "footerText": "Ihr Standort und die Dauer werden nur für die Live-Meditations-Verfolgung verwendet."
+  },
+  "meditation": {
+    "start": "Meditation starten",
+    "startDonate": "Meditation starten - Jetzt spenden",
+    "stop": "Meditation beenden",
+    "yourTime": "Ihre Meditationszeit",
+    "joinTitle": "An der globalen Meditation teilnehmen",
+    "joinDescription": "Geben Sie Ihren Namen ein, um auf der Karte zu erscheinen (optional)",
+    "namePlaceholder": "Ihr Name (oder leer lassen für anonym)",
+    "startButton": "Meditation starten"
+  },
+  "meditators": {
+    "title": "Aktive Meditierende",
+    "beFirst": "Seien Sie der Erste, der mit dem Meditieren beginnt...",
+    "person": "Person",
+    "people": "Personen",
+    "meditatingNow": "meditieren gerade"
+  },
+  "stats": {
+    "todayTitle": "Heute insgesamt",
+    "collectiveTime": "Kollektive Meditationszeit",
+    "hours": "Stunden",
+    "minutes": "Minuten",
+    "live": "LIVE",
+    "todayPeriod": "Mitternacht bis Mitternacht (24-Stunden-Zeitraum)"
+  },
+  "quotes": {
+    "quote1": "Stille ist die Sprache der Seele.",
+    "quote2": "Frieden ist die größte Kraft.",
+    "quote3": "Meditation verbindet dich mit deinem inneren Licht.",
+    "quote4": "Sei still — und erkenne dich selbst.",
+    "quote5": "Die Welt verändert sich, wenn du deine Schwingung änderst."
+  },
+  "admin": {
+    "loginTitle": "Administrator-Anmeldung",
+    "panelTitle": "Administrator-Panel",
+    "passwordPlaceholder": "Administrator-Passwort eingeben",
+    "incorrectPassword": "Falsches Passwort",
+    "youtubeLabel": "YouTube-Live-Video-URL",
+    "youtubePlaceholder": "https://www.youtube.com/watch?v=...",
+    "youtubeHelper": "Fügen Sie ein beliebiges YouTube-URL-Format ein. Es wird automatisch in das Einbettungsformat konvertiert.",
+    "preview": "Vorschau:",
+    "successMessage": "YouTube-URL erfolgreich aktualisiert!",
+    "errorMessage": "Fehler beim Aktualisieren der URL. Bitte versuchen Sie es erneut."
+  },
+  "profile": {
+    "title": "Mein Profil",
+    "editButton": "Profil bearbeiten",
+    "cancelEdit": "Abbrechen",
+    "saveChanges": "Änderungen speichern",
+    "updateSuccess": "Profil erfolgreich aktualisiert!",
+    "updateError": "Profil konnte nicht aktualisiert werden. Bitte versuchen Sie es erneut.",
+    "nameRequired": "Name ist erforderlich",
+    "centreNameRequired": "BK-Zentrumsname ist erforderlich",
+    "mobileRequired": "Handynummer ist erforderlich",
+    "invalidMobile": "Bitte geben Sie eine gültige Handynummer ein",
+    "mobileExists": "Diese Handynummer ist bereits mit einem anderen Konto registriert",
+    "name": "Name",
+    "mobileNumber": "Handynummer",
+    "bkCentreName": "BK-Zentrumsname"
+  }
+}

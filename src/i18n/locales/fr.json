@@ -1,0 +1,80 @@
+{
+  "common": {
+    "anonymous": "Anonyme",
+    "admin": "Administrateur",
+    "backToDashboard": "Retour au tableau de bord",
+    "cancel": "Annuler",
+    "save": "Enregistrer les modifications",
+    "saving": "Enregistrement...",
+    "login": "Connexion",
+    "password": "Mot de passe"
+  },
+  "dashboard": {
+    "title": "Puissance de Sakash",
+    "subtitle": "Méditation mondiale en direct",
+    "liveCount": "{{count}} méditants en direct dans le monde",
+    "detectingLocation": "Détection de votre emplacement...",
+    "globalMap": "Global Collective Time",
+    "footerText": "Votre emplacement et votre durée sont utilisés uniquement pour le suivi de la méditation en direct."
+  },
+  "meditation": {
+    "start": "Commencer la méditation",
+    "startDonate": "Commencer la méditation - Faire un don maintenant",
+    "stop": "Arrêter la méditation",
+    "yourTime": "Votre temps de méditation",
+    "joinTitle": "Rejoindre la méditation mondiale",
+    "joinDescription": "Entrez votre nom pour apparaître sur la carte (facultatif)",
+    "namePlaceholder": "Votre nom (ou laissez vide pour anonyme)",
+    "startButton": "Commencer la méditation"
+  },
+  "meditators": {
+    "title": "Méditants actifs",
+    "beFirst": "Soyez le premier à commencer à méditer...",
+    "person": "personne",
+    "people": "personnes",
+    "meditatingNow": "méditent maintenant"
+  },
+  "stats": {
+    "todayTitle": "Total d'aujourd'hui",
+    "collectiveTime": "Temps de méditation collectif",
+    "hours": "Heures",
+    "minutes": "Minutes",
+    "live": "EN DIRECT",
+    "todayPeriod": "Minuit à minuit (période de 24 heures)"
+  },
+  "quotes": {
+    "quote1": "Le silence est le langage de l'âme.",
+    "quote2": "La paix est le plus grand pouvoir.",
+    "quote3": "La méditation vous connecte à votre lumière intérieure.",
+    "quote4": "Soyez immobile — et connaissez-vous.",
+    "quote5": "Le monde change lorsque vous changez votre vibration."
+  },
+  "admin": {
+    "loginTitle": "Connexion administrateur",
+    "panelTitle": "Panneau d'administration",
+    "passwordPlaceholder": "Entrez le mot de passe administrateur",
+    "incorrectPassword": "Mot de passe incorrect",
+    "youtubeLabel": "URL de la vidéo YouTube en direct",
+    "youtubePlaceholder": "https://www.youtube.com/watch?v=...",
+    "youtubeHelper": "Collez n'importe quel format d'URL YouTube. Il sera automatiquement converti en format intégré.",
+    "preview": "Aperçu :",
+    "successMessage": "URL YouTube mise à jour avec succès !",
+    "errorMessage": "Erreur lors de la mise à jour de l'URL. Veuillez réessayer."
+  },
+  "profile": {
+    "title": "Mon profil",
+    "editButton": "Modifier le profil",
+    "cancelEdit": "Annuler",
+    "saveChanges": "Enregistrer les modifications",
+    "updateSuccess": "Profil mis à jour avec succès !",
+    "updateError": "Échec de la mise à jour du profil. Veuillez réessayer.",
+    "nameRequired": "Le nom est requis",
+    "centreNameRequired": "Le nom du centre BK est requis",
+    "mobileRequired": "Le numéro de mobile est requis",
+    "invalidMobile": "Veuillez entrer un numéro de mobile valide",
+    "mobileExists": "Ce numéro de mobile est déjà enregistré sur un autre compte",
+    "name": "Nom",
+    "mobileNumber": "Numéro de mobile",
+    "bkCentreName": "Nom du centre BK"
+  }
+}
