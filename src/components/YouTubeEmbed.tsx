@@ -196,7 +196,7 @@ export const YouTubeEmbed = ({ isPlaying, onFullscreenChange }: YouTubeEmbedProp
               Ready to Begin?
             </h3>
             <p className="text-teal-200 text-lg leading-relaxed">
-              Please click on <span className="font-semibold text-green-300">Start Meditation</span> button below to begin your meditation session.
+              "<span className="font-semibold text-green-300">START MEDITATION</span>" Button क्लिक कीजिये ,योग व सकाश से महापुन्य कमाने के लिए
             </p>
           </div>
         </div>

@@ -319,9 +319,7 @@ export const Dashboard = () => {
         <CollectiveStatsBar />
         {/* Map moved below YouTube embed as requested */}
 
-        <div className="flex justify-end mb-4">
-          <LanguageSelector />
-        </div>
+        {/* Language selector moved into hamburger menu */}
 
       <AnnouncementBar />
 
@@ -335,15 +333,6 @@ export const Dashboard = () => {
           />
         </div>
 
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 px-6 py-3 bg-green-500/20 rounded-full border border-green-500/30">
-            <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse" />
-            <span className="text-green-300 font-semibold text-lg">
-              {t('dashboard.liveCount', { count: activeMeditators.length })}
-            </span>
-          </div>
-        </div>
-
         <div className="max-w-6xl mx-auto mb-8">
           <YouTubeEmbed isPlaying={isActive} />
         </div>
@@ -352,6 +341,9 @@ export const Dashboard = () => {
         <div className="max-w-7xl mx-auto mb-8">
           <div className="bg-gradient-to-br from-teal-900/40 to-blue-900/40 backdrop-blur-lg rounded-2xl p-6 shadow-2xl border border-teal-500/20 relative">
             {/* Heading removed as requested; overlay stats card hidden */}
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl md:text-2xl font-bold text-white">Live -विश्व सकाश सेवा</h2>
+            </div>
 
             {showGlobe ? (
               <Suspense fallback={
@@ -366,6 +358,16 @@ export const Dashboard = () => {
                 <div className="text-teal-300">Preparing globe...</div>
               </div>
             )}
+          </div>
+        </div>
+
+        {/* Live meditators pill moved below the globe */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center gap-2 px-6 py-3 bg-green-500/20 rounded-full border border-green-500/30">
+            <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse" />
+            <span className="text-green-300 font-semibold text-lg">
+              {t('dashboard.liveCount', { count: activeMeditators.length })}
+            </span>
           </div>
         </div>
 

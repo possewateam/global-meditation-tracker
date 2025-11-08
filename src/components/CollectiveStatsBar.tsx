@@ -30,7 +30,7 @@ export const CollectiveStatsBar = () => {
           </div>
 
           <div className="flex items-baseline gap-2">
-            <div className="text-2xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-100 via-cyan-50 to-teal-100">
+            <div className="text-2xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-amber-400 to-amber-500">
               <AnimatedCounter value={stats.collectiveMinutes} duration={1200} />
             </div>
             <span className="text-teal-200 text-sm md:text-base">mins</span>

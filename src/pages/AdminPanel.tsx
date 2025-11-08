@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Save, Lock, Youtube, Plus, Edit2, Trash2, BookOpen, Mail, ArrowLeft, HelpCircle, Upload, Palette, Image, Bell, Eye, EyeOff, Sparkles, MessageSquare, Video, ArrowUp, ArrowDown, Sun, Moon, Globe as GlobeIcon, Trophy, Users } from 'lucide-react';
+import { Save, Lock, Youtube, Plus, Edit2, Trash2, BookOpen, Mail, ArrowLeft, HelpCircle, Upload, Palette, Image, Bell, Eye, EyeOff, Sparkles, MessageSquare, Video, ArrowUp, ArrowDown, Sun, Moon, Globe as GlobeIcon, Trophy, Users, Heart } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { LanguageSelector } from '../components/LanguageSelector';
@@ -12,6 +12,15 @@ import { LeaderboardManagement } from '../components/LeaderboardManagement';
 
 type Quote = Database['public']['Tables']['quotes']['Row'];
 type RoomVideo = Database['public']['Tables']['meditation_room_videos']['Row'];
+type GoodWishesVideo = {
+  id: string;
+  title: string;
+  youtube_url: string;
+  thumbnail_url: string | null;
+  is_active: boolean;
+  order_index: number | null;
+  created_at: string;
+};
 
 export const AdminPanel = () => {
   const { t, i18n } = useTranslation();
@@ -27,7 +36,7 @@ export const AdminPanel = () => {
   const [youtubeUrl, setYoutubeUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
-  const [activeTab, setActiveTab] = useState<'youtube' | 'quotes' | 'help' | 'theme' | 'presets' | 'hero' | 'announcement' | 'display' | 'notifications' | 'room' | 'duplicates' | 'leaderboard'>('youtube');
+  const [activeTab, setActiveTab] = useState<'youtube' | 'quotes' | 'help' | 'theme' | 'presets' | 'hero' | 'announcement' | 'display' | 'notifications' | 'room' | 'goodwishes' | 'duplicates' | 'leaderboard'>('youtube');
 
   const [helpYoutubeUrl, setHelpYoutubeUrl] = useState('');
   const [helpImageUrl, setHelpImageUrl] = useState('');
@@ -59,6 +68,12 @@ export const AdminPanel = () => {
   const [newVideo, setNewVideo] = useState({ title: '', youtube_url: '' });
   const [showVideoForm, setShowVideoForm] = useState(false);
   const [roomId, setRoomId] = useState<string | null>(null);
+  
+  // Good Wishes Manager state
+  const [gwVideos, setGwVideos] = useState<GoodWishesVideo[]>([]);
+  const [gwEditingVideo, setGwEditingVideo] = useState<GoodWishesVideo | null>(null);
+  const [gwNewVideo, setGwNewVideo] = useState({ title: '', youtube_url: '' });
+  const [gwShowForm, setGwShowForm] = useState(false);
 
   const ADMIN_PASSWORD = 'sakash2024';
 
@@ -87,6 +102,7 @@ export const AdminPanel = () => {
       fetchThemePresets();
       fetchDisplaySettings();
       fetchRoomVideos();
+      fetchGoodWishesVideos();
     }
   }, [isAuthenticated]);
 
@@ -854,6 +870,139 @@ export const AdminPanel = () => {
     return '';
   };
 
+  // Utilities for Good Wishes
+  const extractYoutubeVideoId = (url: string): string | null => {
+    if (!url) return null;
+    const regex = /(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+    const match = url.match(regex);
+    return match && match[1] ? match[1] : null;
+  };
+
+  const getGwThumbnailFromUrl = (url: string): string | null => {
+    const id = extractYoutubeVideoId(url);
+    return id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : null;
+  };
+
+  const fetchGoodWishesVideos = async () => {
+    const { data } = await supabase
+      .from('good_wishes_videos')
+      .select('*')
+      .order('order_index', { ascending: true });
+    setGwVideos(data || []);
+  };
+
+  const handleGwAddVideo = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage('');
+    try {
+      const maxOrder = gwVideos.length > 0
+        ? Math.max(...gwVideos.map(v => v.order_index || 0))
+        : -1;
+
+      const thumb = getGwThumbnailFromUrl(gwNewVideo.youtube_url);
+      const { error } = await supabase
+        .from('good_wishes_videos')
+        .insert({
+          title: gwNewVideo.title,
+          youtube_url: gwNewVideo.youtube_url,
+          thumbnail_url: thumb,
+          is_active: true,
+          order_index: maxOrder + 1,
+        });
+      if (error) throw error;
+      setMessage('Good Wish video added successfully!');
+      setGwNewVideo({ title: '', youtube_url: '' });
+      setGwShowForm(false);
+      fetchGoodWishesVideos();
+    } catch (error) {
+      console.error(error);
+      setMessage('Failed to add Good Wish video');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGwUpdateVideo = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!gwEditingVideo) return;
+    setLoading(true);
+    setMessage('');
+    try {
+      const thumb = getGwThumbnailFromUrl(gwEditingVideo.youtube_url);
+      const { error } = await supabase
+        .from('good_wishes_videos')
+        .update({
+          title: gwEditingVideo.title,
+          youtube_url: gwEditingVideo.youtube_url,
+          thumbnail_url: thumb,
+          is_active: gwEditingVideo.is_active,
+        })
+        .eq('id', gwEditingVideo.id);
+      if (error) throw error;
+      setMessage('Good Wish video updated successfully!');
+      setGwEditingVideo(null);
+      fetchGoodWishesVideos();
+    } catch (error) {
+      console.error(error);
+      setMessage('Failed to update Good Wish video');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGwDeleteVideo = async (id: string) => {
+    if (!confirm('Delete this Good Wish video?')) return;
+    try {
+      const { error } = await supabase
+        .from('good_wishes_videos')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
+      setMessage('Good Wish video deleted successfully!');
+      fetchGoodWishesVideos();
+    } catch (error) {
+      console.error(error);
+      setMessage('Failed to delete Good Wish video');
+    }
+  };
+
+  const toggleGwActive = async (video: GoodWishesVideo) => {
+    try {
+      const { error } = await supabase
+        .from('good_wishes_videos')
+        .update({ is_active: !video.is_active })
+        .eq('id', video.id);
+      if (error) throw error;
+      fetchGoodWishesVideos();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleGwMoveVideo = async (videoId: string, direction: 'up' | 'down') => {
+    const currentIndex = gwVideos.findIndex(v => v.id === videoId);
+    if (currentIndex === -1) return;
+    const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    if (targetIndex < 0 || targetIndex >= gwVideos.length) return;
+
+    const currentVideo = gwVideos[currentIndex];
+    const targetVideo = gwVideos[targetIndex];
+    try {
+      await supabase
+        .from('good_wishes_videos')
+        .update({ order_index: targetVideo.order_index })
+        .eq('id', currentVideo.id);
+      await supabase
+        .from('good_wishes_videos')
+        .update({ order_index: currentVideo.order_index })
+        .eq('id', targetVideo.id);
+      fetchGoodWishesVideos();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   if (!isAuthenticated) {
     if (showForgotPassword) {
       return (
@@ -1088,7 +1237,7 @@ export const AdminPanel = () => {
               <MessageSquare className="w-5 h-5" />
               Notifications
             </button>
-            <button
+          <button
               onClick={() => setActiveTab('room')}
               className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
                 activeTab === 'room'
@@ -1098,6 +1247,17 @@ export const AdminPanel = () => {
             >
               <Video className="w-5 h-5" />
               Room
+            </button>
+            <button
+              onClick={() => setActiveTab('goodwishes')}
+              className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
+                activeTab === 'goodwishes'
+                  ? 'bg-teal-500 text-white'
+                  : 'bg-white/10 text-teal-300 hover:bg-white/20'
+              }`}
+            >
+              <Heart className="w-5 h-5" />
+              Good Wishes
             </button>
             <button
               onClick={() => setActiveTab('leaderboard')}
@@ -2203,6 +2363,226 @@ export const AdminPanel = () => {
                   <Video className="w-16 h-16 text-teal-400 mx-auto mb-4 opacity-50" />
                   <p className="text-teal-300 text-lg">No videos added yet</p>
                   <p className="text-teal-400 text-sm mt-2">Click "Add Video" to create your first meditation room video</p>
+                </div>
+              )}
+
+              <a
+                href="/"
+                className="block text-center py-3 bg-white/10 text-white rounded-lg font-semibold hover:bg-white/20 transition-all duration-300 border border-teal-500/30"
+              >
+                {t('common.backToDashboard')}
+              </a>
+            </div>
+          )}
+
+          {activeTab === 'goodwishes' && (
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                  <Heart className="w-6 h-6 text-pink-400" />
+                  Good Wishes Manager
+                </h2>
+                <button
+                  onClick={() => setGwShowForm(!gwShowForm)}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition-all"
+                >
+                  <Plus className="w-5 h-5" />
+                  Add Video
+                </button>
+              </div>
+
+              <p className="text-teal-300">
+                Manage YouTube videos for the Good Wishes page. Only active videos are shown to users.
+              </p>
+
+              {gwShowForm && (
+                <form onSubmit={handleGwAddVideo} className="bg-white/5 rounded-xl p-6 border border-teal-500/20 space-y-4">
+                  <div>
+                    <label className="block text-teal-300 mb-2">Video Title</label>
+                    <input
+                      type="text"
+                      value={gwNewVideo.title}
+                      onChange={(e) => setGwNewVideo({ ...gwNewVideo, title: e.target.value })}
+                      className="w-full px-4 py-3 bg-white/5 border border-teal-500/30 rounded-lg text-white focus:outline-none focus:border-teal-500 transition-colors"
+                      placeholder="Enter a descriptive title for the video"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-teal-300 mb-2">YouTube URL</label>
+                    <input
+                      type="text"
+                      value={gwNewVideo.youtube_url}
+                      onChange={(e) => setGwNewVideo({ ...gwNewVideo, youtube_url: e.target.value })}
+                      className="w-full px-4 py-3 bg-white/5 border border-teal-500/30 rounded-lg text-white focus:outline-none focus:border-teal-500 transition-colors"
+                      placeholder="https://www.youtube.com/watch?v=..."
+                      required
+                    />
+                  </div>
+
+                  {gwNewVideo.youtube_url && (
+                    <div className="bg-white/5 rounded-xl p-4 border border-teal-500/20">
+                      <p className="text-teal-300 text-sm mb-3 font-semibold">Preview</p>
+                      {getEmbedUrl(gwNewVideo.youtube_url) ? (
+                        <div className="aspect-video bg-black rounded-lg overflow-hidden">
+                          <iframe
+                            src={getEmbedUrl(gwNewVideo.youtube_url)}
+                            title="Video Preview"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                            className="w-full h-full"
+                          />
+                        </div>
+                      ) : (
+                        <div className="aspect-video bg-red-500/10 border border-red-500/30 rounded-lg flex items-center justify-center">
+                          <p className="text-red-400 text-center px-4">
+                            Invalid YouTube URL format. Preview not available.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="flex gap-4">
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="flex-1 py-3 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition-all disabled:opacity-50"
+                    >
+                      {loading ? 'Adding...' : 'Add Video'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setGwShowForm(false);
+                        setGwNewVideo({ title: '', youtube_url: '' });
+                      }}
+                      className="flex-1 py-3 bg-white/10 text-white rounded-lg font-semibold hover:bg-white/20 transition-all"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              )}
+
+              <div className="space-y-4">
+                {gwVideos.map((video, index) => (
+                  <div
+                    key={video.id}
+                    className={`bg-white/5 rounded-xl p-6 border transition-all ${
+                      video.is_active ? 'border-green-500/30' : 'border-gray-500/30 opacity-60'
+                    }`}
+                  >
+                    {gwEditingVideo?.id === video.id ? (
+                      <form onSubmit={handleGwUpdateVideo} className="space-y-4">
+                        <input
+                          type="text"
+                          value={gwEditingVideo.title}
+                          onChange={(e) => setGwEditingVideo({ ...gwEditingVideo, title: e.target.value })}
+                          className="w-full px-4 py-3 bg-white/5 border border-teal-500/30 rounded-lg text-white focus:outline-none focus:border-teal-500"
+                          placeholder="Video Title"
+                        />
+                        <input
+                          type="text"
+                          value={gwEditingVideo.youtube_url}
+                          onChange={(e) => setGwEditingVideo({ ...gwEditingVideo, youtube_url: e.target.value })}
+                          className="w-full px-4 py-3 bg-white/5 border border-teal-500/30 rounded-lg text-white focus:outline-none focus:border-teal-500"
+                          placeholder="YouTube URL"
+                        />
+                        <div className="flex gap-4">
+                          <button
+                            type="submit"
+                            disabled={loading}
+                            className="flex-1 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50"
+                          >
+                            Save
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setGwEditingVideo(null)}
+                            className="flex-1 py-2 bg-white/10 text-white rounded-lg hover:bg-white/20"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </form>
+                    ) : (
+                      <>
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex-1">
+                            <h3 className="text-xl font-bold text-white mb-2">{video.title}</h3>
+                            <p className="text-teal-400 text-sm break-all">{video.youtube_url}</p>
+                          </div>
+                          <div className="flex gap-2 ml-4">
+                            <button
+                              onClick={() => handleGwMoveVideo(video.id, 'up')}
+                              disabled={index === 0}
+                              className="p-2 bg-blue-500/20 text-blue-300 rounded-lg hover:bg-blue-500/30 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                              title="Move up"
+                            >
+                              <ArrowUp className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleGwMoveVideo(video.id, 'down')}
+                              disabled={index === gwVideos.length - 1}
+                              className="p-2 bg-blue-500/20 text-blue-300 rounded-lg hover:bg-blue-500/30 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                              title="Move down"
+                            >
+                              <ArrowDown className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 mb-4">
+                          <span className="text-sm text-teal-300 bg-teal-900/30 px-3 py-1 rounded-full">
+                            Order: {index + 1}
+                          </span>
+                          <span className={`text-sm px-3 py-1 rounded-full ${
+                            video.is_active
+                              ? 'text-green-300 bg-green-900/30'
+                              : 'text-gray-400 bg-gray-900/30'
+                          }`}>
+                            {video.is_active ? 'Active' : 'Inactive'}
+                          </span>
+                        </div>
+
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => setGwEditingVideo(video)}
+                            className="flex items-center gap-2 px-4 py-2 bg-blue-500/20 text-blue-300 rounded-lg hover:bg-blue-500/30 transition-all"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => toggleGwActive(video)}
+                            className={`px-4 py-2 rounded-lg transition-all ${
+                              video.is_active
+                                ? 'bg-yellow-500/20 text-yellow-300 hover:bg-yellow-500/30'
+                                : 'bg-green-500/20 text-green-300 hover:bg-green-500/30'
+                            }`}
+                          >
+                            {video.is_active ? 'Deactivate' : 'Activate'}
+                          </button>
+                          <button
+                            onClick={() => handleGwDeleteVideo(video.id)}
+                            className="flex items-center gap-2 px-4 py-2 bg-red-500/20 text-red-300 rounded-lg hover:bg-red-500/30 transition-all"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                            Delete
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {gwVideos.length === 0 && !gwShowForm && (
+                <div className="text-center py-12 bg-white/5 rounded-xl border border-teal-500/20">
+                  <Heart className="w-16 h-16 text-pink-400 mx-auto mb-4 opacity-50" />
+                  <p className="text-teal-300 text-lg">No videos added yet</p>
+                  <p className="text-teal-400 text-sm mt-2">Click "Add Video" to create your first Good Wishes video</p>
                 </div>
               )}
 

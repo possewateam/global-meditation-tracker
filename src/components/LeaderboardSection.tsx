@@ -122,7 +122,7 @@ export const LeaderboardSection = () => {
     <div className="w-full bg-gradient-to-br from-teal-900/40 to-blue-900/40 backdrop-blur-lg rounded-2xl p-6 shadow-2xl border border-teal-500/20">
       <div className="flex items-center gap-3 mb-6">
         <Trophy className="w-7 h-7 text-yellow-400" />
-        <h2 className="text-2xl font-bold text-white">Top 100 Meditators List</h2>
+        <h2 className="text-2xl font-bold text-white">विश्व सेवा में संगठित योगदान</h2>
       </div>
 
       <div className="flex items-center gap-2 mb-6 flex-wrap">

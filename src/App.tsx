@@ -12,10 +12,11 @@ const MeditationHistory = lazy(() => import('./pages/MeditationHistory').then(m 
 const HelpPage = lazy(() => import('./pages/HelpPage').then(m => ({ default: m.HelpPage })));
 const MeditationRoom = lazy(() => import('./pages/MeditationRoom').then(m => ({ default: m.MeditationRoom })));
 const Profile = lazy(() => import('./pages/Profile').then(m => ({ default: m.Profile })));
+const GoodWishes = lazy(() => import('./pages/GoodWishes').then(m => ({ default: m.GoodWishes })));
 const LocationConsentModal = lazy(() => import('./components/LocationConsentModal').then(m => ({ default: m.LocationConsentModal })));
 const GoogleProfileCompletionModal = lazy(() => import('./components/GoogleProfileCompletionModal').then(m => ({ default: m.GoogleProfileCompletionModal })));
 
-type Page = 'login' | 'register' | 'dashboard' | 'history' | 'admin' | 'help' | 'room' | 'profile';
+type Page = 'login' | 'register' | 'dashboard' | 'history' | 'admin' | 'help' | 'room' | 'profile' | 'goodwishes';
 
 const AppContent = () => {
   const { user, loading, showLocationModal, setShowLocationModal, showProfileCompletionModal, googleUserData, completeGoogleProfile, refreshUser } = useAuth();
@@ -74,6 +75,11 @@ const AppContent = () => {
       return;
     }
 
+    if (path === '/goodwishes') {
+      setCurrentPage('goodwishes');
+      return;
+    }
+
     if (path === '/room') {
       setCurrentPage('room');
       return;
@@ -128,7 +134,18 @@ const AppContent = () => {
 
   if (currentPage === 'admin') {
     if (import.meta.env.DEV) {
-      console.log('[App] Rendering AdminPanel');
+      console.log('[App] Rendering Admin route');
+    }
+    // Require Supabase-authenticated user for AdminPanel to satisfy RLS policies
+    if (!user) {
+      if (import.meta.env.DEV) {
+        console.log('[App] No user, redirecting admin to Login');
+      }
+      return (
+        <Suspense fallback={<LoadingFallback />}>
+          <Login />
+        </Suspense>
+      );
     }
     return (
       <Suspense fallback={<LoadingFallback />}>
@@ -171,6 +188,14 @@ const AppContent = () => {
     return (
       <Suspense fallback={<LoadingFallback />}>
         <HelpPage onBack={() => handleNavigate('dashboard')} />
+      </Suspense>
+    );
+  }
+
+  if (currentPage === 'goodwishes') {
+    return (
+      <Suspense fallback={<LoadingFallback />}>
+        <GoodWishes onBack={() => handleNavigate('dashboard')} />
       </Suspense>
     );
   }

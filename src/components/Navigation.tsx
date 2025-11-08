@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
-import { Home, History, LogOut, HelpCircle, Video, User, Menu, Users, Trophy, Calendar } from 'lucide-react';
+import { Home, History, LogOut, HelpCircle, Video, User, Menu, Users, Trophy, Calendar, Youtube } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
+import { LanguageSelector } from './LanguageSelector';
 
 interface NavigationProps {
-  currentPage: 'dashboard' | 'history' | 'room' | 'profile';
-  onNavigate: (page: 'dashboard' | 'history' | 'help' | 'room' | 'profile') => void;
+  currentPage: 'dashboard' | 'history' | 'room' | 'profile' | 'goodwishes';
+  onNavigate: (page: 'dashboard' | 'history' | 'help' | 'room' | 'profile' | 'goodwishes') => void;
 }
 
 export const Navigation = ({ currentPage, onNavigate }: NavigationProps) => {
@@ -144,6 +145,12 @@ export const Navigation = ({ currentPage, onNavigate }: NavigationProps) => {
                     </>
                   );
                 })()}
+
+                {/* Language selector moved into hamburger menu */}
+                <div className="px-2 py-2">
+                  <LanguageSelector />
+                </div>
+
                 <button
                   onClick={() => { setMenuOpen(false); onNavigate('history'); }}
                   className={`w-full flex items-center gap-2 px-3 py-2 rounded-md text-left transition ${
@@ -152,6 +159,16 @@ export const Navigation = ({ currentPage, onNavigate }: NavigationProps) => {
                 >
                   <History className="w-4 h-4" />
                   <span>{t('nav.history')}</span>
+                </button>
+
+                <button
+                  onClick={() => { setMenuOpen(false); onNavigate('goodwishes'); }}
+                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-md text-left transition ${
+                    currentPage === 'goodwishes' ? 'bg-white/15 text-white' : 'text-white/80 hover:bg-white/10 hover:text-white'
+                  }`}
+                >
+                  <Youtube className="w-4 h-4" />
+                  <span>Good Wishes</span>
                 </button>
 
                 {showMeditationRoom && (
