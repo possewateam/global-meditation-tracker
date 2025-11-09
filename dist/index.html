@@ -9,15 +9,34 @@
     <link rel="dns-prefetch" href="https://www.youtube.com">
     <link rel="dns-prefetch" href="https://unpkg.com">
     <title>Power of Sakash - Global Meditation</title>
-    <script type="module" crossorigin src="/assets/index-DwrExZEh.js"></script>
-    <link rel="modulepreload" crossorigin href="/assets/vendor-three-WWH58ZbN.js">
-    <link rel="modulepreload" crossorigin href="/assets/vendor-other-D2N4SXMU.js">
-    <link rel="modulepreload" crossorigin href="/assets/vendor-i18n-CPrbmvBl.js">
-    <link rel="modulepreload" crossorigin href="/assets/vendor-react-CsWuKxj5.js">
-    <link rel="modulepreload" crossorigin href="/assets/vendor-supabase-D4rA0elu.js">
-    <link rel="modulepreload" crossorigin href="/assets/page-admin-DgYsNXAM.js">
-    <link rel="stylesheet" crossorigin href="/assets/vendor-react-CI4oKIB7.css">
-    <link rel="stylesheet" crossorigin href="/assets/index-C1Y75oGc.css">
+    <script>
+      // Global name-helper polyfills for vendor bundles
+      (function(){
+        // Ensure __safeName and __fnName exist for assignments like `__name = __safeName`
+        if (typeof window.__safeName !== 'function') {
+          window.__safeName = function(fn) { return fn; };
+        }
+        if (typeof window.__fnName !== 'function') {
+          window.__fnName = function(fn) { return fn; };
+        }
+        // Global __name polyfill for chunks that reference it before defining
+        if (typeof window.__name !== 'function') {
+          window.__name = function(target, value) {
+            try { Object.defineProperty(target, 'name', { value, configurable: true }); } catch(_) {}
+            return target;
+          };
+        }
+      })();
+    </script>
+    <script type="module" crossorigin src="/assets/index-BxZ87--W.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/vendor-three-DgmlkwHn.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-other-D9QTidg2.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-i18n-DgyYewF3.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-react-B3cVin9Q.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-supabase-BYHeWUli.js">
+    <link rel="modulepreload" crossorigin href="/assets/page-admin-cU6anLI0.js">
+    <link rel="stylesheet" crossorigin href="/assets/vendor-react-Bbgo5x5y.css">
+    <link rel="stylesheet" crossorigin href="/assets/index-DUrciu4n.css">
   </head>
   <body>
     <div id="root"></div>

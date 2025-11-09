@@ -308,7 +308,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     localStorage.setItem('userId', data.id);
     setUser(data);
-    setShowLocationModal(true);
 
     return { success: true };
   };
@@ -459,9 +458,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setShowProfileCompletionModal(false);
       setGoogleUserData(null);
 
-      if (!savedUser.location_consent_given) {
-        setShowLocationModal(true);
-      }
+      
 
       return { success: true };
     } catch (error) {

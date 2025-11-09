@@ -9,6 +9,25 @@
     <link rel="dns-prefetch" href="https://www.youtube.com">
     <link rel="dns-prefetch" href="https://unpkg.com">
     <title>Power of Sakash - Global Meditation</title>
+    <script>
+      // Global name-helper polyfills for vendor bundles
+      (function(){
+        // Ensure __safeName and __fnName exist for assignments like `__name = __safeName`
+        if (typeof window.__safeName !== 'function') {
+          window.__safeName = function(fn) { return fn; };
+        }
+        if (typeof window.__fnName !== 'function') {
+          window.__fnName = function(fn) { return fn; };
+        }
+        // Global __name polyfill for chunks that reference it before defining
+        if (typeof window.__name !== 'function') {
+          window.__name = function(target, value) {
+            try { Object.defineProperty(target, 'name', { value, configurable: true }); } catch(_) {}
+            return target;
+          };
+        }
+      })();
+    </script>
     <script type="module">
       if (import.meta.env && import.meta.env.DEV) {
         const RefreshRuntime = (await import("/@react-refresh")).default;

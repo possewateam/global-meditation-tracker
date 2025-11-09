@@ -16,8 +16,9 @@ const Profile = lazy(() => import('./pages/Profile').then(m => ({ default: m.Pro
 const GoodWishes = lazy(() => import('./pages/GoodWishes.tsx').then(m => ({ default: m.GoodWishes })));
 const LocationConsentModal = lazy(() => import('./components/LocationConsentModal').then(m => ({ default: m.LocationConsentModal })));
 const GoogleProfileCompletionModal = lazy(() => import('./components/GoogleProfileCompletionModal').then(m => ({ default: m.GoogleProfileCompletionModal })));
+const ThreeDemo = lazy(() => import('./pages/ThreeDemo').then(m => ({ default: m.ThreeDemo })));
 
-type Page = 'login' | 'register' | 'dashboard' | 'history' | 'admin' | 'help' | 'room' | 'profile' | 'goodwishes';
+type Page = 'login' | 'register' | 'dashboard' | 'history' | 'admin' | 'help' | 'room' | 'profile' | 'goodwishes' | 'three';
 
 const AppContent = () => {
   const { user, loading, showLocationModal, setShowLocationModal, showProfileCompletionModal, googleUserData, completeGoogleProfile, refreshUser } = useAuth();
@@ -73,6 +74,11 @@ const AppContent = () => {
 
     if (path === '/help') {
       setCurrentPage('help');
+      return;
+    }
+
+    if (path === '/three') {
+      setCurrentPage('three');
       return;
     }
 
@@ -213,6 +219,14 @@ const AppContent = () => {
     return (
       <Suspense fallback={<LoadingFallback />}>
         <Profile onBack={() => handleNavigate('dashboard')} />
+      </Suspense>
+    );
+  }
+
+  if (currentPage === 'three') {
+    return (
+      <Suspense fallback={<LoadingFallback />}>
+        <ThreeDemo onBack={() => handleNavigate('dashboard')} />
       </Suspense>
     );
   }

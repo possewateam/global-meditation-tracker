@@ -8,37 +8,19 @@ import { useActiveMeditators } from '../hooks/useActiveMeditators';
 import { YouTubeEmbed } from '../components/YouTubeEmbed';
 import { MeditationControls } from '../components/MeditationControls';
 import { CollectiveStatsBar } from '../components/CollectiveStatsBar';
+import { PersonalStatsBar } from '../components/PersonalStatsBar';
 import { ActiveMeditatorsList } from '../components/ActiveMeditatorsList';
 import { TodayStats } from '../components/TodayStats';
 import { InspirationalQuotes } from '../components/InspirationalQuotes';
-import { LanguageSelector } from '../components/LanguageSelector';
 import { AnnouncementBar } from '../components/AnnouncementBar';
 import { NotificationToast } from '../components/NotificationToast';
 import { PushNotificationPrompt } from '../components/PushNotificationPrompt';
-import { CollectiveMeditationStats } from '../components/CollectiveMeditationStats';
 import { LeaderboardSection } from '../components/LeaderboardSection';
 import { TodaySessionRecords } from '../components/TodaySessionRecords';
 import { getGeoOrFallback } from '../utils/getGeoOrFallback';
 
 const MeditationGlobe = lazy(() => import('../components/MeditationGlobe').then(module => ({ default: module.MeditationGlobe })));
 
-interface MeditationSession {
-  id: string;
-  name: string | null;
-  location: string | null;
-  latitude: number | null;
-  longitude: number | null;
-  start_time: string | null;
-  duration_seconds: number | null;
-  user_id?: string | null;
-  users?: {
-    city_town?: string | null;
-    district?: string | null;
-    state?: string | null;
-    country?: string | null;
-    bk_centre_name?: string | null;
-  } | null;
-}
 
 export const Dashboard = () => {
   const { t } = useTranslation();
@@ -51,7 +33,6 @@ export const Dashboard = () => {
   const [userName, setUserName] = useState('');
   const [showNamePrompt, setShowNamePrompt] = useState(false);
   const [todayTotal, setTodayTotal] = useState(0);
-  const [heroImageUrl, setHeroImageUrl] = useState('');
   const [showActiveMeditators, setShowActiveMeditators] = useState(true);
   const [showGlobe, setShowGlobe] = useState(false);
 
@@ -75,26 +56,13 @@ export const Dashboard = () => {
 
     if (typeof requestIdleCallback !== 'undefined') {
       requestIdleCallback(() => {
-        fetchHeroImage();
         fetchDisplaySettings();
       });
     } else {
       setTimeout(() => {
-        fetchHeroImage();
         fetchDisplaySettings();
       }, 100);
     }
-
-    const heroChannel = supabase
-      .channel('hero-settings-changes')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'hero_settings' },
-        () => {
-          fetchHeroImage();
-        }
-      )
-      .subscribe();
 
     const displayChannel = supabase
       .channel('display-settings-changes')
@@ -123,7 +91,6 @@ export const Dashboard = () => {
     }, 30000);
 
     return () => {
-      try { supabase.removeChannel(heroChannel); } catch { heroChannel.unsubscribe?.(); }
       try { supabase.removeChannel(displayChannel); } catch { displayChannel.unsubscribe?.(); }
       clearInterval(updateInterval);
       clearInterval(cleanupInterval);
@@ -188,21 +155,6 @@ export const Dashboard = () => {
     }
   };
 
-  const fetchHeroImage = async () => {
-    if (!isSupabaseEnabled()) return;
-    try {
-      const { data } = await supabase
-        .from('hero_settings')
-        .select('image_url')
-        .maybeSingle();
-
-      if (data && data.image_url) {
-        setHeroImageUrl(data.image_url);
-      }
-    } catch (e: any) {
-      disableSupabase('Network error fetching hero image');
-    }
-  };
 
   const fetchDisplaySettings = async () => {
     if (!isSupabaseEnabled()) return;
@@ -358,6 +310,8 @@ export const Dashboard = () => {
       <div className="container mx-auto px-4 py-8">
         {/* Global Collective Time stats bar directly below navbar */}
         <CollectiveStatsBar />
+        {/* Personal Total Meditation Time stats bar */}
+        <PersonalStatsBar />
         {/* Map moved below YouTube embed as requested */}
 
         {/* Language selector moved into hamburger menu */}
@@ -467,6 +421,13 @@ export const Dashboard = () => {
               >
                 Brahmakumaris
               </a>
+            </div>
+
+            {/* HelpDesk WhatsApp footer highlight */}
+            <div className="mt-4 flex justify-center">
+              <span className="inline-flex items-center px-4 py-2 rounded-full bg-amber-500/10 border border-amber-400/40 text-amber-300 font-semibold drop-shadow-[0_0_6px_rgba(251,191,36,0.35)]">
+                HelpDesk Only Whatsapp No- 8016701999 (Message Only)
+              </span>
             </div>
           </div>
         </footer>

@@ -118,6 +118,12 @@ export const Navigation = ({ currentPage, onNavigate }: NavigationProps) => {
               <span className="hidden sm:inline">{t('nav.history')}</span>
             </button>
           </div>
+          {/* Center welcome text */}
+          <div className="hidden md:flex items-center">
+            <span className="text-lg font-extrabold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-amber-400 to-orange-500 drop-shadow-[0_0_8px_rgba(250,204,21,0.35)]">
+              BRAHMAKUMARIS WELCOMES YOU
+            </span>
+          </div>
           <div className="relative">
             <button
               aria-label="Open menu"

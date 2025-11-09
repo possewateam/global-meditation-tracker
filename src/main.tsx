@@ -1,10 +1,52 @@
 import { StrictMode } from 'react';
+// Namespace import for runtime guard to expose global React
+import * as ReactNS from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 import './i18n/config';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import * as THREE from 'three';
+
+// Ensure vendor bundles relying on a global THREE reference work correctly
+// Some third-party modules check window.THREE and expect constructors like Mesh/Group
+// Setting this avoids runtime errors like "Super expression must either be null or a function"
+// when extending classes from THREE via global access.
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+if (typeof window !== 'undefined') {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (window as any).THREE = THREE;
+  // Ensure third-party bundles that read global React find it
+  // Some vendor shims access React at module top-level (e.g., useSyncExternalStore shim)
+  // Provide a global reference to avoid circular import evaluation crashes
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (window as any).React = (window as any).React || ReactNS;
+
+  // Provide global __name helper if missing (used by compiled vendor chunks)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if (!(window as any).__name) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).__name = (target: Function, value: string) => {
+      try {
+        Object.defineProperty(target, 'name', { value, configurable: true });
+      } catch {
+        // ignore
+      }
+      return target;
+    };
+  }
+
+  // Provide a safe performance.now fallback for timing code
+  if (typeof performance === 'undefined') {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).performance = {};
+  }
+  if (typeof performance.now !== 'function') {
+    performance.now = () => Date.now();
+  }
+}
 
 if (import.meta.env.DEV) {
   console.log('[Main] Starting application initialization');

@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useCollectiveMeditationTime } from '../hooks/useCollectiveMeditationTime';
-import { Sparkles } from 'lucide-react';
+import { Globe } from 'lucide-react';
 import { AnimatedCounter } from './AnimatedCounter';
 
 export const CollectiveStatsBar = () => {
@@ -22,7 +22,10 @@ export const CollectiveStatsBar = () => {
 
         <div className="relative z-10 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Sparkles className="w-5 h-5 text-teal-200 animate-pulse" />
+            <span className="relative inline-block w-5 h-5">
+              <span className="absolute inset-0 rounded-full bg-amber-400/30 blur-md animate-pulse" />
+              <Globe className="relative z-10 w-5 h-5 text-amber-300 drop-shadow-[0_0_8px_rgba(251,191,36,0.7)]" />
+            </span>
             <span className="text-xs md:text-sm font-semibold text-teal-100 uppercase tracking-wider">
               {/* Using existing key which now maps to "Global Collective Time" */}
               {t('dashboard.globalMap')}

@@ -3,6 +3,7 @@ import { LogIn, Phone } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { LanguageSelector } from '../components/LanguageSelector';
+import { HelpModal } from '../components/HelpModal';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 
@@ -16,6 +17,7 @@ export const Login = () => {
   const [error, setError] = useState('');
   const [validationError, setValidationError] = useState('');
   const formRef = useRef<HTMLFormElement | null>(null);
+  const [helpOpen, setHelpOpen] = useState(false);
 
   const validateMobileNumber = (number: string): string => {
     if (!number) return 'Mobile number is required';
@@ -80,12 +82,14 @@ export const Login = () => {
   const HIDE_GOOGLE_SECTION = true;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-teal-800 to-emerald-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-teal-800 to-emerald-900 flex flex-col items-center justify-center p-4">
       <div className="absolute top-4 right-4">
         <LanguageSelector />
       </div>
 
       <div className="w-full max-w-md">
+        {/* Help modal overlay */}
+        <HelpModal isOpen={helpOpen} onClose={() => setHelpOpen(false)} />
         <div className="mb-6 text-center">
           <p className="text-white/70 text-lg mb-3">
             {t('auth.notRegistered')}{' '}
@@ -99,9 +103,11 @@ export const Login = () => {
         </div>
 
         <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-2xl border border-white/20">
-          <div className="flex items-center justify-center gap-3 mb-6">
-            <LogIn className="w-10 h-10 text-teal-300" />
-            <h1 className="text-3xl font-bold text-white">{t('auth.login')}</h1>
+          <div className="relative mb-6">
+            <div className="flex items-center justify-center gap-3">
+              <LogIn className="w-10 h-10 text-teal-300" />
+              <h1 className="text-3xl font-bold text-white">{t('auth.login')}</h1>
+            </div>
           </div>
 
           <p className="text-teal-200 text-center mb-8">
@@ -194,6 +200,8 @@ export const Login = () => {
           )}
         </div>
       </div>
+
+      {/* Footer hero removed as requested */}
 
       <style>{`
         .phone-input-container {

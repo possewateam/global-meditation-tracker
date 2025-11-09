@@ -16,7 +16,6 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",
-    "@types/three": "^0.180.0",
     "country-state-city": "^3.2.1",
     "dotenv": "^17.2.3",
     "i18next": "^25.6.0",
@@ -27,12 +26,13 @@
     "react-globe.gl": "^2.36.0",
     "react-i18next": "^16.2.0",
     "react-phone-input-2": "^2.15.1",
-    "three": "^0.180.0",
-    "world-countries": "^5.1.0"
+    "world-countries": "^5.1.0",
+    "three": "^0.181.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.1",
     "@rollup/plugin-json": "^6.1.0",
+    "@types/three": "^0.180.0",
     "@types/react": "^18.3.5",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
@@ -45,6 +45,7 @@
     "postcss": "^8.4.35",
     "rollup-plugin-visualizer": "^6.0.5",
     "tailwindcss": "^3.4.1",
+    "terser": "^5.44.1",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.3.0",
     "vite": "^5.4.2",

@@ -17,10 +17,10 @@ html {
 }
 
 /* Safari fallback for selection utilities */
-.select-none { -webkit-user-select: none; }
-.select-text { -webkit-user-select: text; }
-.select-all { -webkit-user-select: all; }
-.select-auto { -webkit-user-select: auto; }
+.select-none { user-select: none; -webkit-user-select: none; }
+.select-text { user-select: text; -webkit-user-select: text; }
+.select-all { user-select: all; -webkit-user-select: all; }
+.select-auto { user-select: auto; -webkit-user-select: auto; }
 
 /* Prevent horizontal scrolling across the entire app while keeping vertical scroll */
 html, body, #root {
