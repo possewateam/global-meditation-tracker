@@ -19,6 +19,7 @@ pnpm-debug.log*
 .vscode/
 .DS_Store
 Thumbs.db
+package-lock.json
 
 # Coverage and reports
 coverage/
